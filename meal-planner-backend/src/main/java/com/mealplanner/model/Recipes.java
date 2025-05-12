@@ -32,6 +32,12 @@ public class Recipes {
 	@Column(nullable = false, columnDefinition = "text")
 	private String instructions;
 	
+	@Column(name = "vegetarian", nullable = false)
+	private Boolean vegetarian;
+	
+	@Column(name = "meat_eater", nullable = false)
+	private Boolean meatEater;
+	
 	@Column(name = "created_at", updatable = false)
 	private LocalDateTime createdAt;
 
@@ -81,6 +87,22 @@ public class Recipes {
 
 	public void setInstructions(String instructions) {
 		this.instructions = instructions;
+	}
+
+	public Boolean getVegetarian() {
+		return vegetarian;
+	}
+
+	public void setVegetarian(Boolean vegetarian) {
+		this.vegetarian = vegetarian;
+	}
+
+	public Boolean getMeatEater() {
+		return meatEater;
+	}
+
+	public void setMeatEater(Boolean meatEater) {
+		this.meatEater = meatEater;
 	}
 
 	public LocalDateTime getCreatedAt() {

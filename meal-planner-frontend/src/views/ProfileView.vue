@@ -18,26 +18,36 @@
           <label class="block mb-1">體重 (kg)</label>
           <input v-model.number="form.weight" type="number" min="0" step="0.1" required class="w-full border px-2 py-1" />
         </div>
-        <h3 class="text-lg mt-6 mb-2">飲食偏好</h3>
+        <h3 class="text-lg mt-6 mb-2">飲食偏好（葷素擇一）</h3>
+        <div class="mb-4 flex items-center space-x-4">
+        <label class="inline-flex items-center">
+          <input
+            type="radio"
+            value="vegetarian"
+            v-model="form.dietType"
+            class="mr-2"
+          />
+          素食者
+        </label>
+        <label class="inline-flex items-center">
+          <input
+            type="radio"
+            value="meatEater"
+            v-model="form.dietType"
+            class="mr-2"
+          />
+          葷食者
+        </label>
+      </div>
+
+      <!-- 熱量／蛋白質 -->
       <div class="mb-4">
         <label class="block mb-1">每日熱量目標 (kcal)</label>
-        <input v-model.number="form.calories" type="number" min="0" required class="w-full border px-2 py-1" />
+        <input v-model.number="form.calorieGoal" type="number" min="0" required class="w-full border px-2 py-1" />
       </div>
       <div class="mb-4">
         <label class="block mb-1">每日蛋白質目標 (g)</label>
-        <input v-model.number="form.protein" type="number" min="0" required class="w-full border px-2 py-1" />
-      </div>
-      <div class="mb-4">
-        <label class="inline-flex items-center">
-          <input type="checkbox" v-model="form.vegetarian" class="mr-2" />
-          素食者 (Vegetarian)
-        </label>
-      </div>
-      <div class="mb-4">
-        <label class="inline-flex items-center">
-          <input type="checkbox" v-model="form.meateater" class="mr-2" />
-          葷食者(meateater)
-        </label>
+        <input v-model.number="form.proteinGoal" type="number" min="0" required class="w-full border px-2 py-1" />
       </div>
 
         <div v-if="error" class="mb-4 text-red-500">{{ error }}</div>
@@ -58,19 +68,20 @@
   import { useRouter } from 'vue-router'
   
   const router = useRouter()
+  const loading = ref(false)
+  const error = ref(null)
+
   const form = ref({
     fullName: '',
     age: null,
     height: null,
     weight: null,
     // 飲食偏好欄位
-    calories: null,
-    protein: null,
-    vegetarian: false,
-    meateater: false
+    calorieGoal: null,
+    proteinGoal: null,
+    dietType:    '',  // "vegetarian" 或 "meatEater"
   })
-  const loading = ref(false)
-  const error = ref(null)
+  
   
   async function loadProfile() {
     loading.value = true
@@ -82,17 +93,24 @@
       form.value.age = data.age
       form.value.height = data.height
       form.value.weight = data.weight
-      
-      // 解析 JSON 字串到欄位
-      let prefs = {}
-      try { prefs = JSON.parse(data.dietPreferences) } catch {}
-      form.value.calories   = prefs.calories   ?? null
-      form.value.protein    = prefs.protein    ?? null
-      form.value.vegetarian = prefs.vegetarian ?? false
-      form.value.meateater  = prefs.meateater      ?? false
+      if (data.vegetarian) form.value.dietType = 'vegetarian'
+      else if (data.meatEater) form.value.dietType = 'meatEater'
+      else form.value.dietType = ''
+      form.value.calorieGoal = data.calorieGoal
+      form.value.proteinGoal = data.proteinGoal
+
+      // // 解析 JSON 字串到欄位
+      // let prefs = {}
+      // try { prefs = JSON.parse(data.dietPreferences) } catch {}
+      // form.value.calories   = prefs.calories   ?? null
+      // form.value.protein    = prefs.protein    ?? null
+      // form.value.vegetarian = prefs.vegetarian ?? false
+      // form.value.meateater  = prefs.meateater      ?? false
 
     } catch (err) {
       if (err.response?.status === 401 || err.response?.status === 403) {
+         // token 過期或未授權：導回登入
+        localStorage.removeItem('jwt')
         router.push({ name: 'login' })
       } else {
         error.value = '讀取個人資料失敗'
@@ -103,23 +121,25 @@
   }
   
   async function onSubmit() {
+    if (!form.value.dietType) {
+    error.value = '請選擇「素食者」或「葷食者」'
+    return
+    }
     loading.value = true
     error.value = null
     try {
-        const prefs={
-          calories:   form.value.calories,
-          protein:    form.value.protein,
-          vegetarian: form.value.vegetarian,
-          meateater:  form.value.meateater
-        }
-        await axios.put('/api/profile', {
-        fullName: form.value.fullName,
-        age: form.value.age,
-        height: form.value.height,
-        weight: form.value.weight,
-        dietPreferences: JSON.stringify(prefs)
-      })
-      alert('資料已儲存!')
+      const payload = {
+      fullName:    form.value.fullName,
+      age:         form.value.age,
+      height:      form.value.height,
+      weight:      form.value.weight,
+      calorieGoal: form.value.calorieGoal,
+      proteinGoal: form.value.proteinGoal,
+      vegetarian:  form.value.dietType === 'vegetarian',
+      meatEater:   form.value.dietType === 'meatEater'
+      }
+    await axios.put('/api/profile', payload)
+    alert('資料已儲存！')
     } catch {
       error.value = '儲存失敗'
     } finally {

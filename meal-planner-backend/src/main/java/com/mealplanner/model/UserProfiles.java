@@ -27,8 +27,17 @@ public class UserProfiles {
 	
 	private Double weight;
 	
-	@Column(name="diet_preferences",columnDefinition = "json")
-	private String dietPreferences;
+	@Column(name = "calorie_goal")
+	private Integer calorieGoal;
+	
+	@Column(name = "protein_goal")
+	private Integer proteinGoal;
+	
+	@Column(name = "vegetarian", nullable = false)
+    private Boolean vegetarian = false;
+	
+	@Column(name = "meat_eater", nullable = false)
+    private Boolean meatEater = false;
 
 	public Long getId() {
 		return id;
@@ -78,11 +87,35 @@ public class UserProfiles {
 		this.weight = weight;
 	}
 
-	public String getDietPreferences() {
-		return dietPreferences;
+	public Integer getCalorieGoal() {
+		return calorieGoal;
 	}
 
-	public void setDietPreference(String dietPreferences) {
-		this.dietPreferences = dietPreferences;
+	public void setCalorieGoal(Integer calorieGoal) {
+		this.calorieGoal = calorieGoal;
+	}
+
+	public Integer getProteinGoal() {
+		return proteinGoal;
+	}
+
+	public void setProteinGoal(Integer proteinGoal) {
+		this.proteinGoal = proteinGoal;
+	}
+
+	public Boolean getVegetarian() {
+		return vegetarian;
+	}
+
+	public void setVegetarian(Boolean vegetarian) {
+		this.vegetarian = vegetarian;
+	}
+
+	public Boolean getMeatEater() {
+		return meatEater;
+	}
+
+	public void setMeatEater(Boolean meatEater) {
+		this.meatEater = meatEater;
 	}
 }

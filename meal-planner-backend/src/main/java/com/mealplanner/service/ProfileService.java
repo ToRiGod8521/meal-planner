@@ -30,7 +30,12 @@ public class ProfileService {
        existing.setAge(dto.getAge());
        existing.setHeight(dto.getHeight());
        existing.setWeight(dto.getWeight());
-       existing.setDietPreference(dto.getDietPreferences());
+       
+       existing.setCalorieGoal(dto.getCalorieGoal());
+       existing.setProteinGoal(dto.getProteinGoal());
+       existing.setVegetarian(dto.getVegetarian());
+       existing.setMeatEater(dto.getMeatEater());
+       
        return profileRepository.save(existing);
     }
 

@@ -1,7 +1,9 @@
 package com.mealplanner.contorller;
 
 import java.security.Principal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +35,12 @@ public class MealPlanController {
 	@GetMapping
 	public ResponseEntity<List<MealPlans>> getWeeklyPlan(Principal principal){
 		Long userId = Long.valueOf(principal.getName());
-		LocalDate start = LocalDate.now();
-		LocalDate end = start.plusDays(6);
-		List<MealPlans> plans = mealPlanRepository.findByUserIdAndPlanDateBetween(userId, start, end);
+		
+		LocalDate today  = LocalDate.now();
+        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate sunday = monday.plusDays(6);
+		
+		List<MealPlans> plans = mealPlanRepository.findByUserIdAndPlanDateBetween(userId, monday,sunday);
 		return ResponseEntity.ok(plans);
 	}
 }
